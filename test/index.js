@@ -23,4 +23,4 @@ Division = "/";
 var ebnfParser = new EBNFParser(EBNF);
 ebnfParser.saveSyntaxDiagram("./EBNF.html");
 var parser = ebnfParser.createParser();
-console.log(parser);
+//console.log(parser);

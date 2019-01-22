@@ -130,7 +130,7 @@
   {
     "type": "Rule",
     "name": "rhs",
-    "orgText": "() => {\n                    $.OR([\n                        { ALT: () => { $.SUBRULE($.rhs_optional); }},\n                        { ALT: () => { $.SUBRULE($.rhs_repeated); }},\n                        { ALT: () => { $.SUBRULE($.rhs_group); }},\n                        {\n                            ALT: () => {\n                                $.OPTION(() => {\n                                    $.OR1([\n                                        { ALT: () => { $.SUBRULE($.terminal); }},\n                                        { ALT: () => { $.SUBRULE($.identifier); }}\n                                    ]);\n                                    $.OPTION1(() => { $.CONSUME(Vocabulary.WhiteSpace); });\n                                    $.MANY(() => { $.SUBRULE($.rhs_list); });\n                                });\n                            }\n                        }\n                    ]);\n                }",
+    "orgText": "() => {\n                    $.OR([\n                        { ALT: () => { $.SUBRULE($.rhs_optional); }},\n                        { ALT: () => { $.SUBRULE($.rhs_repeated); }},\n                        { ALT: () => { $.SUBRULE($.rhs_group); }},\n                        {\n                            ALT: () => {\n                                $.OPTION(() => {\n                                    $.OR1([\n                                        { ALT: () => { $.SUBRULE($.terminal); }},\n                                        { ALT: () => { $.SUBRULE($.identifier); }}\n                                    ]);\n                                    $.OPTION1(() => { $.CONSUME(Vocabulary.WhiteSpace); });\n                                    $.SUBRULE($.rhs_list);\n                                });\n                            }\n                        }\n                    ]);\n                }",
     "definition": [
       {
         "type": "Alternation",
@@ -213,15 +213,9 @@
                     ]
                   },
                   {
-                    "type": "Repetition",
-                    "idx": 0,
-                    "definition": [
-                      {
-                        "type": "NonTerminal",
-                        "name": "rhs_list",
-                        "idx": 0
-                      }
-                    ]
+                    "type": "NonTerminal",
+                    "name": "rhs_list",
+                    "idx": 0
                   }
                 ]
               }
@@ -234,7 +228,7 @@
   {
     "type": "Rule",
     "name": "rhs_optional",
-    "orgText": "() => {\n                    $.CONSUME(Vocabulary.OpenOption);\n                    $.OPTION(() => { $.CONSUME(Vocabulary.WhiteSpace); });\n                    $.SUBRULE($.rhs);\n                    $.OPTION1(() => { $.CONSUME1(Vocabulary.WhiteSpace); });\n                    $.CONSUME(Vocabulary.CloseOption);\n                    $.MANY(() => { $.SUBRULE($.rhs_list); });\n                }",
+    "orgText": "() => {\n                    let allowList = p.allowList;\n                    $.CONSUME(Vocabulary.OpenOption);\n                    $.OPTION(() => { $.CONSUME(Vocabulary.WhiteSpace); });\n                    p.allowList = true;\n                    $.SUBRULE($.rhs);\n                    p.allowList = allowList;\n                    $.OPTION1(() => { $.CONSUME1(Vocabulary.WhiteSpace); });\n                    $.CONSUME(Vocabulary.CloseOption);\n                    $.SUBRULE($.rhs_list);\n                }",
     "definition": [
       {
         "type": "Terminal",
@@ -282,22 +276,16 @@
         "pattern": "\\]"
       },
       {
-        "type": "Repetition",
-        "idx": 0,
-        "definition": [
-          {
-            "type": "NonTerminal",
-            "name": "rhs_list",
-            "idx": 0
-          }
-        ]
+        "type": "NonTerminal",
+        "name": "rhs_list",
+        "idx": 0
       }
     ]
   },
   {
     "type": "Rule",
     "name": "rhs_repeated",
-    "orgText": "() => {\n                    $.CONSUME(Vocabulary.OpenRepeat);\n                    $.OPTION(() => { $.CONSUME(Vocabulary.WhiteSpace); });\n                    $.SUBRULE($.rhs);\n                    $.OPTION1(() => { $.CONSUME1(Vocabulary.WhiteSpace); });\n                    $.CONSUME(Vocabulary.CloseRepeat);\n                    $.MANY(() => { $.SUBRULE($.rhs_list); });\n                }",
+    "orgText": "() => {\n                    let allowList = p.allowList;\n                    $.CONSUME(Vocabulary.OpenRepeat);\n                    $.OPTION(() => { $.CONSUME(Vocabulary.WhiteSpace); });\n                    p.allowList = true;\n                    $.SUBRULE($.rhs);\n                    p.allowList = allowList;\n                    $.OPTION1(() => { $.CONSUME1(Vocabulary.WhiteSpace); });\n                    $.CONSUME(Vocabulary.CloseRepeat);\n                    $.SUBRULE($.rhs_list);\n                }",
     "definition": [
       {
         "type": "Terminal",
@@ -345,22 +333,16 @@
         "pattern": "\\}"
       },
       {
-        "type": "Repetition",
-        "idx": 0,
-        "definition": [
-          {
-            "type": "NonTerminal",
-            "name": "rhs_list",
-            "idx": 0
-          }
-        ]
+        "type": "NonTerminal",
+        "name": "rhs_list",
+        "idx": 0
       }
     ]
   },
   {
     "type": "Rule",
     "name": "rhs_group",
-    "orgText": "() => {\n                    $.CONSUME(Vocabulary.OpenGroup);\n                    $.OPTION(() => { $.CONSUME(Vocabulary.WhiteSpace); });\n                    $.SUBRULE($.rhs);\n                    $.OPTION1(() => { $.CONSUME1(Vocabulary.WhiteSpace); });\n                    $.CONSUME(Vocabulary.CloseGroup);\n                    $.MANY(() => { $.SUBRULE($.rhs_list); });\n                }",
+    "orgText": "() => {\n                    let allowList = p.allowList;\n                    $.CONSUME(Vocabulary.OpenGroup);\n                    $.OPTION(() => { $.CONSUME(Vocabulary.WhiteSpace); });\n                    p.allowList = true;\n                    $.SUBRULE($.rhs);\n                    p.allowList = allowList;\n                    $.OPTION1(() => { $.CONSUME1(Vocabulary.WhiteSpace); });\n                    $.CONSUME(Vocabulary.CloseGroup);\n                    $.SUBRULE($.rhs_list);\n                }",
     "definition": [
       {
         "type": "Terminal",
@@ -408,56 +390,56 @@
         "pattern": "\\)"
       },
       {
-        "type": "Repetition",
-        "idx": 0,
-        "definition": [
-          {
-            "type": "NonTerminal",
-            "name": "rhs_list",
-            "idx": 0
-          }
-        ]
+        "type": "NonTerminal",
+        "name": "rhs_list",
+        "idx": 0
       }
     ]
   },
   {
     "type": "Rule",
     "name": "rhs_list",
-    "orgText": "() => {\n                    $.SUBRULE($.rhs_separator);\n                    $.OPTION(() => { $.CONSUME(Vocabulary.WhiteSpace); });\n                    $.SUBRULE($.rhs);\n                    $.OPTION1(() => { $.CONSUME1(Vocabulary.WhiteSpace); });\n                }",
+    "orgText": "() => {\n                    if (p.allowList) {\n                        p.allowList = false;\n                        $.MANY(() => {\n                            $.SUBRULE($.rhs_separator);\n                            $.OPTION(() => { $.CONSUME(Vocabulary.WhiteSpace); });\n                            $.SUBRULE($.rhs);\n                            $.OPTION1(() => { $.CONSUME1(Vocabulary.WhiteSpace); });\n                        });\n                        p.allowList = true;\n                    }\n                }",
     "definition": [
       {
-        "type": "NonTerminal",
-        "name": "rhs_separator",
-        "idx": 0
-      },
-      {
-        "type": "Option",
+        "type": "Repetition",
         "idx": 0,
         "definition": [
           {
-            "type": "Terminal",
-            "name": "WhiteSpace",
-            "label": "WhiteSpace",
-            "idx": 0,
-            "pattern": "[\\t\\s]+"
-          }
-        ]
-      },
-      {
-        "type": "NonTerminal",
-        "name": "rhs",
-        "idx": 0
-      },
-      {
-        "type": "Option",
-        "idx": 1,
-        "definition": [
+            "type": "NonTerminal",
+            "name": "rhs_separator",
+            "idx": 0
+          },
           {
-            "type": "Terminal",
-            "name": "WhiteSpace",
-            "label": "WhiteSpace",
+            "type": "Option",
+            "idx": 0,
+            "definition": [
+              {
+                "type": "Terminal",
+                "name": "WhiteSpace",
+                "label": "WhiteSpace",
+                "idx": 0,
+                "pattern": "[\\t\\s]+"
+              }
+            ]
+          },
+          {
+            "type": "NonTerminal",
+            "name": "rhs",
+            "idx": 0
+          },
+          {
+            "type": "Option",
             "idx": 1,
-            "pattern": "[\\t\\s]+"
+            "definition": [
+              {
+                "type": "Terminal",
+                "name": "WhiteSpace",
+                "label": "WhiteSpace",
+                "idx": 1,
+                "pattern": "[\\t\\s]+"
+              }
+            ]
           }
         ]
       }

@@ -102,6 +102,7 @@ const Tokens = [
 module.exports = (function() {
     function pvtData() {
         return {
+            allowList: true,
             tokens: null,
             grammar: null,
             createRules() {
@@ -142,7 +143,7 @@ module.exports = (function() {
                                         { ALT: () => { $.SUBRULE($.identifier); }}
                                     ]);
                                     $.OPTION1(() => { $.CONSUME(Vocabulary.WhiteSpace); });
-                                    $.MANY(() => { $.SUBRULE($.rhs_list); });
+                                    $.SUBRULE($.rhs_list);
                                 });
                             }
                         }
@@ -150,37 +151,52 @@ module.exports = (function() {
                 });
 
                 $.RULE("rhs_optional", () => {
+                    let allowList = p.allowList;
                     $.CONSUME(Vocabulary.OpenOption);
                     $.OPTION(() => { $.CONSUME(Vocabulary.WhiteSpace); });
+                    p.allowList = true;
                     $.SUBRULE($.rhs);
+                    p.allowList = allowList;
                     $.OPTION1(() => { $.CONSUME1(Vocabulary.WhiteSpace); });
                     $.CONSUME(Vocabulary.CloseOption);
-                    $.MANY(() => { $.SUBRULE($.rhs_list); });
+                    $.SUBRULE($.rhs_list);
                 });
 
                 $.RULE("rhs_repeated", () => {
+                    let allowList = p.allowList;
                     $.CONSUME(Vocabulary.OpenRepeat);
                     $.OPTION(() => { $.CONSUME(Vocabulary.WhiteSpace); });
+                    p.allowList = true;
                     $.SUBRULE($.rhs);
+                    p.allowList = allowList;
                     $.OPTION1(() => { $.CONSUME1(Vocabulary.WhiteSpace); });
                     $.CONSUME(Vocabulary.CloseRepeat);
-                    $.MANY(() => { $.SUBRULE($.rhs_list); });
+                    $.SUBRULE($.rhs_list);
                 });
 
                 $.RULE("rhs_group", () => {
+                    let allowList = p.allowList;
                     $.CONSUME(Vocabulary.OpenGroup);
                     $.OPTION(() => { $.CONSUME(Vocabulary.WhiteSpace); });
+                    p.allowList = true;
                     $.SUBRULE($.rhs);
+                    p.allowList = allowList;
                     $.OPTION1(() => { $.CONSUME1(Vocabulary.WhiteSpace); });
                     $.CONSUME(Vocabulary.CloseGroup);
-                    $.MANY(() => { $.SUBRULE($.rhs_list); });
+                    $.SUBRULE($.rhs_list);
                 });
 
                 $.RULE("rhs_list", () => {
-                    $.SUBRULE($.rhs_separator);
-                    $.OPTION(() => { $.CONSUME(Vocabulary.WhiteSpace); });
-                    $.SUBRULE($.rhs);
-                    $.OPTION1(() => { $.CONSUME1(Vocabulary.WhiteSpace); });
+                    if (p.allowList) {
+                        p.allowList = false;
+                        $.MANY(() => {
+                            $.SUBRULE($.rhs_separator);
+                            $.OPTION(() => { $.CONSUME(Vocabulary.WhiteSpace); });
+                            $.SUBRULE($.rhs);
+                            $.OPTION1(() => { $.CONSUME1(Vocabulary.WhiteSpace); });
+                        });
+                        p.allowList = true;
+                    }
                 });
 
                 $.RULE("rhs_separator", () => {
@@ -257,10 +273,10 @@ module.exports = (function() {
             },
             createAST(cst) {
                 let visitor = new (require("./lib/EBNFVisitor")(this.getBaseCstVisitorConstructor()));
-                visitor.visit(cst);
+                return visitor.visit(cst);
             },
             generateParser(ast) {
-
+                console.log(ast);
             }
         };
     }
