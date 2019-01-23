@@ -21,6 +21,11 @@ Division = "/";
 `;
 
 var ebnfParser = new EBNFParser(EBNF);
-ebnfParser.saveSyntaxDiagram("./EBNF.html");
-var parser = ebnfParser.createParser();
-//console.log(parser);
+var parser = ebnfParser.learnLanguage();
+parser.saveSyntaxDiagram("./EBNF.html");
+
+/* The real language examination begins here.
+   
+   let ast = parser.parse(sourceFile);
+
+ */

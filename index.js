@@ -105,6 +105,9 @@ module.exports = (function() {
             allowList: true,
             tokens: null,
             grammar: null,
+            astNodeTypes: null,
+            generatedSource: null,
+            compiler: null,
             createRules() {
                 let p = getPrivate(this, "createRules", true);
                 let $ = this;
@@ -282,11 +285,18 @@ module.exports = (function() {
                 });
             },
             createAST(cst) {
-                let visitor = new (require("./lib/EBNFVisitor")(this.getBaseCstVisitorConstructor()));
+                let p = getPrivate(this, "createAST", true);
+                let Visitor = require("./lib/EBNFVisitor")(this.getBaseCstVisitorConstructor());
+                let visitor = new Visitor;
+                p.astNodeTypes = Visitor.Types;
                 return visitor.visit(cst);
             },
             generateParser(ast) {
-                console.log(ast);
+                let p = getPrivate(this, "generateParser", true);
+                let visitor = new (require("./lib/EBNF_AST2JS"))(p.astNodeTypes);
+                let source = visitor.visit(ast);
+                p.compiler = eval.source
+                return eval(source);
             }
         };
     }
@@ -334,7 +344,7 @@ module.exports = (function() {
             fs.writeFileSync(filename, htmlText)
         }
 
-        createParser() {
+        learnLanguage() {
             let p = getPrivate(this, "createParser");
             this.performSelfAnalysis();
             this.input = p.tokens;
