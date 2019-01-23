@@ -132,18 +132,37 @@ module.exports = (function() {
 
                 $.RULE("rhs", () => {
                     $.OR([
-                        { ALT: () => { $.SUBRULE($.rhs_optional); }},
-                        { ALT: () => { $.SUBRULE($.rhs_repeated); }},
-                        { ALT: () => { $.SUBRULE($.rhs_group); }},
+                        {
+                            ALT: () => {
+                                $.OR1([
+                                    { ALT: () => { $.SUBRULE($.rhs_optional); }},
+                                    { ALT: () => { $.SUBRULE($.rhs_repeated); }},
+                                    { ALT: () => { $.SUBRULE($.rhs_group); }}
+                                ]);
+                                if (p.allowList) {
+                                    p.allowList = false;
+                                    $.MANY(() => {
+                                        $.SUBRULE($.rhs_list);
+                                    });
+                                    p.allowList = true;
+                                }
+                            }
+                        },
                         {
                             ALT: () => {
                                 $.OPTION(() => {
-                                    $.OR1([
+                                    $.OR2([
                                         { ALT: () => { $.SUBRULE($.terminal); }},
                                         { ALT: () => { $.SUBRULE($.identifier); }}
                                     ]);
                                     $.OPTION1(() => { $.CONSUME(Vocabulary.WhiteSpace); });
-                                    $.SUBRULE($.rhs_list);
+                                    if (p.allowList) {
+                                        p.allowList = false;
+                                        $.MANY1(() => {
+                                            $.SUBRULE1($.rhs_list);
+                                        });
+                                        p.allowList = true;
+                                    }
                                 });
                             }
                         }
@@ -159,7 +178,6 @@ module.exports = (function() {
                     p.allowList = allowList;
                     $.OPTION1(() => { $.CONSUME1(Vocabulary.WhiteSpace); });
                     $.CONSUME(Vocabulary.CloseOption);
-                    $.SUBRULE($.rhs_list);
                 });
 
                 $.RULE("rhs_repeated", () => {
@@ -171,7 +189,6 @@ module.exports = (function() {
                     p.allowList = allowList;
                     $.OPTION1(() => { $.CONSUME1(Vocabulary.WhiteSpace); });
                     $.CONSUME(Vocabulary.CloseRepeat);
-                    $.SUBRULE($.rhs_list);
                 });
 
                 $.RULE("rhs_group", () => {
@@ -183,20 +200,13 @@ module.exports = (function() {
                     p.allowList = allowList;
                     $.OPTION1(() => { $.CONSUME1(Vocabulary.WhiteSpace); });
                     $.CONSUME(Vocabulary.CloseGroup);
-                    $.SUBRULE($.rhs_list);
                 });
 
                 $.RULE("rhs_list", () => {
-                    if (p.allowList) {
-                        p.allowList = false;
-                        $.MANY(() => {
-                            $.SUBRULE($.rhs_separator);
-                            $.OPTION(() => { $.CONSUME(Vocabulary.WhiteSpace); });
-                            $.SUBRULE($.rhs);
-                            $.OPTION1(() => { $.CONSUME1(Vocabulary.WhiteSpace); });
-                        });
-                        p.allowList = true;
-                    }
+                    $.SUBRULE($.rhs_separator);
+                    $.OPTION(() => { $.CONSUME(Vocabulary.WhiteSpace); });
+                    $.SUBRULE($.rhs);
+                    $.OPTION1(() => { $.CONSUME1(Vocabulary.WhiteSpace); });
                 });
 
                 $.RULE("rhs_separator", () => {

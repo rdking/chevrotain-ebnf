@@ -130,7 +130,7 @@
   {
     "type": "Rule",
     "name": "rhs",
-    "orgText": "() => {\n                    $.OR([\n                        { ALT: () => { $.SUBRULE($.rhs_optional); }},\n                        { ALT: () => { $.SUBRULE($.rhs_repeated); }},\n                        { ALT: () => { $.SUBRULE($.rhs_group); }},\n                        {\n                            ALT: () => {\n                                $.OPTION(() => {\n                                    $.OR1([\n                                        { ALT: () => { $.SUBRULE($.terminal); }},\n                                        { ALT: () => { $.SUBRULE($.identifier); }}\n                                    ]);\n                                    $.OPTION1(() => { $.CONSUME(Vocabulary.WhiteSpace); });\n                                    $.SUBRULE($.rhs_list);\n                                });\n                            }\n                        }\n                    ]);\n                }",
+    "orgText": "() => {\n                    $.OR([\n                        {\n                            ALT: () => {\n                                $.OR1([\n                                    { ALT: () => { $.SUBRULE($.rhs_optional); }},\n                                    { ALT: () => { $.SUBRULE($.rhs_repeated); }},\n                                    { ALT: () => { $.SUBRULE($.rhs_group); }}\n                                ]);\n                                if (p.allowList) {\n                                    p.allowList = false;\n                                    $.MANY(() => {\n                                        $.SUBRULE($.rhs_list);\n                                    });\n                                    p.allowList = true;\n                                }\n                            }\n                        },\n                        {\n                            ALT: () => {\n                                $.OPTION(() => {\n                                    $.OR2([\n                                        { ALT: () => { $.SUBRULE($.terminal); }},\n                                        { ALT: () => { $.SUBRULE($.identifier); }}\n                                    ]);\n                                    $.OPTION1(() => { $.CONSUME(Vocabulary.WhiteSpace); });\n                                    if (p.allowList) {\n                                        p.allowList = false;\n                                        $.MANY1(() => {\n                                            $.SUBRULE1($.rhs_list);\n                                        });\n                                        p.allowList = true;\n                                    }\n                                });\n                            }\n                        }\n                    ]);\n                }",
     "definition": [
       {
         "type": "Alternation",
@@ -140,29 +140,51 @@
             "type": "Flat",
             "definition": [
               {
-                "type": "NonTerminal",
-                "name": "rhs_optional",
-                "idx": 0
-              }
-            ]
-          },
-          {
-            "type": "Flat",
-            "definition": [
+                "type": "Alternation",
+                "idx": 1,
+                "definition": [
+                  {
+                    "type": "Flat",
+                    "definition": [
+                      {
+                        "type": "NonTerminal",
+                        "name": "rhs_optional",
+                        "idx": 0
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Flat",
+                    "definition": [
+                      {
+                        "type": "NonTerminal",
+                        "name": "rhs_repeated",
+                        "idx": 0
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Flat",
+                    "definition": [
+                      {
+                        "type": "NonTerminal",
+                        "name": "rhs_group",
+                        "idx": 0
+                      }
+                    ]
+                  }
+                ]
+              },
               {
-                "type": "NonTerminal",
-                "name": "rhs_repeated",
-                "idx": 0
-              }
-            ]
-          },
-          {
-            "type": "Flat",
-            "definition": [
-              {
-                "type": "NonTerminal",
-                "name": "rhs_group",
-                "idx": 0
+                "type": "Repetition",
+                "idx": 0,
+                "definition": [
+                  {
+                    "type": "NonTerminal",
+                    "name": "rhs_list",
+                    "idx": 0
+                  }
+                ]
               }
             ]
           },
@@ -175,7 +197,7 @@
                 "definition": [
                   {
                     "type": "Alternation",
-                    "idx": 1,
+                    "idx": 2,
                     "definition": [
                       {
                         "type": "Flat",
@@ -213,9 +235,15 @@
                     ]
                   },
                   {
-                    "type": "NonTerminal",
-                    "name": "rhs_list",
-                    "idx": 0
+                    "type": "Repetition",
+                    "idx": 1,
+                    "definition": [
+                      {
+                        "type": "NonTerminal",
+                        "name": "rhs_list",
+                        "idx": 1
+                      }
+                    ]
                   }
                 ]
               }
@@ -228,7 +256,7 @@
   {
     "type": "Rule",
     "name": "rhs_optional",
-    "orgText": "() => {\n                    let allowList = p.allowList;\n                    $.CONSUME(Vocabulary.OpenOption);\n                    $.OPTION(() => { $.CONSUME(Vocabulary.WhiteSpace); });\n                    p.allowList = true;\n                    $.SUBRULE($.rhs);\n                    p.allowList = allowList;\n                    $.OPTION1(() => { $.CONSUME1(Vocabulary.WhiteSpace); });\n                    $.CONSUME(Vocabulary.CloseOption);\n                    $.SUBRULE($.rhs_list);\n                }",
+    "orgText": "() => {\n                    let allowList = p.allowList;\n                    $.CONSUME(Vocabulary.OpenOption);\n                    $.OPTION(() => { $.CONSUME(Vocabulary.WhiteSpace); });\n                    p.allowList = true;\n                    $.SUBRULE($.rhs);\n                    p.allowList = allowList;\n                    $.OPTION1(() => { $.CONSUME1(Vocabulary.WhiteSpace); });\n                    $.CONSUME(Vocabulary.CloseOption);\n                }",
     "definition": [
       {
         "type": "Terminal",
@@ -274,18 +302,13 @@
         "label": "CloseOption",
         "idx": 0,
         "pattern": "\\]"
-      },
-      {
-        "type": "NonTerminal",
-        "name": "rhs_list",
-        "idx": 0
       }
     ]
   },
   {
     "type": "Rule",
     "name": "rhs_repeated",
-    "orgText": "() => {\n                    let allowList = p.allowList;\n                    $.CONSUME(Vocabulary.OpenRepeat);\n                    $.OPTION(() => { $.CONSUME(Vocabulary.WhiteSpace); });\n                    p.allowList = true;\n                    $.SUBRULE($.rhs);\n                    p.allowList = allowList;\n                    $.OPTION1(() => { $.CONSUME1(Vocabulary.WhiteSpace); });\n                    $.CONSUME(Vocabulary.CloseRepeat);\n                    $.SUBRULE($.rhs_list);\n                }",
+    "orgText": "() => {\n                    let allowList = p.allowList;\n                    $.CONSUME(Vocabulary.OpenRepeat);\n                    $.OPTION(() => { $.CONSUME(Vocabulary.WhiteSpace); });\n                    p.allowList = true;\n                    $.SUBRULE($.rhs);\n                    p.allowList = allowList;\n                    $.OPTION1(() => { $.CONSUME1(Vocabulary.WhiteSpace); });\n                    $.CONSUME(Vocabulary.CloseRepeat);\n                }",
     "definition": [
       {
         "type": "Terminal",
@@ -331,18 +354,13 @@
         "label": "CloseRepeat",
         "idx": 0,
         "pattern": "\\}"
-      },
-      {
-        "type": "NonTerminal",
-        "name": "rhs_list",
-        "idx": 0
       }
     ]
   },
   {
     "type": "Rule",
     "name": "rhs_group",
-    "orgText": "() => {\n                    let allowList = p.allowList;\n                    $.CONSUME(Vocabulary.OpenGroup);\n                    $.OPTION(() => { $.CONSUME(Vocabulary.WhiteSpace); });\n                    p.allowList = true;\n                    $.SUBRULE($.rhs);\n                    p.allowList = allowList;\n                    $.OPTION1(() => { $.CONSUME1(Vocabulary.WhiteSpace); });\n                    $.CONSUME(Vocabulary.CloseGroup);\n                    $.SUBRULE($.rhs_list);\n                }",
+    "orgText": "() => {\n                    let allowList = p.allowList;\n                    $.CONSUME(Vocabulary.OpenGroup);\n                    $.OPTION(() => { $.CONSUME(Vocabulary.WhiteSpace); });\n                    p.allowList = true;\n                    $.SUBRULE($.rhs);\n                    p.allowList = allowList;\n                    $.OPTION1(() => { $.CONSUME1(Vocabulary.WhiteSpace); });\n                    $.CONSUME(Vocabulary.CloseGroup);\n                }",
     "definition": [
       {
         "type": "Terminal",
@@ -388,58 +406,47 @@
         "label": "CloseGroup",
         "idx": 0,
         "pattern": "\\)"
-      },
-      {
-        "type": "NonTerminal",
-        "name": "rhs_list",
-        "idx": 0
       }
     ]
   },
   {
     "type": "Rule",
     "name": "rhs_list",
-    "orgText": "() => {\n                    if (p.allowList) {\n                        p.allowList = false;\n                        $.MANY(() => {\n                            $.SUBRULE($.rhs_separator);\n                            $.OPTION(() => { $.CONSUME(Vocabulary.WhiteSpace); });\n                            $.SUBRULE($.rhs);\n                            $.OPTION1(() => { $.CONSUME1(Vocabulary.WhiteSpace); });\n                        });\n                        p.allowList = true;\n                    }\n                }",
+    "orgText": "() => {\n                    $.SUBRULE($.rhs_separator);\n                    $.OPTION(() => { $.CONSUME(Vocabulary.WhiteSpace); });\n                    $.SUBRULE($.rhs);\n                    $.OPTION1(() => { $.CONSUME1(Vocabulary.WhiteSpace); });\n                }",
     "definition": [
       {
-        "type": "Repetition",
+        "type": "NonTerminal",
+        "name": "rhs_separator",
+        "idx": 0
+      },
+      {
+        "type": "Option",
         "idx": 0,
         "definition": [
           {
-            "type": "NonTerminal",
-            "name": "rhs_separator",
-            "idx": 0
-          },
-          {
-            "type": "Option",
+            "type": "Terminal",
+            "name": "WhiteSpace",
+            "label": "WhiteSpace",
             "idx": 0,
-            "definition": [
-              {
-                "type": "Terminal",
-                "name": "WhiteSpace",
-                "label": "WhiteSpace",
-                "idx": 0,
-                "pattern": "[\\t\\s]+"
-              }
-            ]
-          },
+            "pattern": "[\\t\\s]+"
+          }
+        ]
+      },
+      {
+        "type": "NonTerminal",
+        "name": "rhs",
+        "idx": 0
+      },
+      {
+        "type": "Option",
+        "idx": 1,
+        "definition": [
           {
-            "type": "NonTerminal",
-            "name": "rhs",
-            "idx": 0
-          },
-          {
-            "type": "Option",
+            "type": "Terminal",
+            "name": "WhiteSpace",
+            "label": "WhiteSpace",
             "idx": 1,
-            "definition": [
-              {
-                "type": "Terminal",
-                "name": "WhiteSpace",
-                "label": "WhiteSpace",
-                "idx": 1,
-                "pattern": "[\\t\\s]+"
-              }
-            ]
+            "pattern": "[\\t\\s]+"
           }
         ]
       }
