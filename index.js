@@ -295,7 +295,7 @@ module.exports = (function() {
                 let p = getPrivate(this, "generateParser", true);
                 let visitor = new (require("./lib/EBNF_AST2JS"))(p.astNodeTypes);
                 let source = visitor.visit(ast);
-                p.compiler = eval.source
+                p.compiler = source;
                 return eval(source);
             }
         };

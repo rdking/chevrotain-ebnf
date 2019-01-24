@@ -1,7 +1,7 @@
 const chevrotain = require("chevrotain");
 const EBNFParser = require("../index"); //require("chevrotain-ebnf");
 
-const EBNF =
+const EBNF = String.raw
 `Expression = SubExpression | Operation;
 SubExpression = ( "(", [ ws ], Expression, [ ws ], ")" );
 ws = { " " | "\t" | "\n" | "\r" };
