@@ -11,7 +11,7 @@
             "program": "${workspaceFolder}/test/index.js",
             "skipFiles": [
                 "<nodeInternals>/**",
-                "**/node_modules",
+                "**/node_modules/x",
                 "${workspaceFolder}/lib/classHelpers.js",
                 "${workspaceFolder}/lib/ASTVisitor.js",
                 "${workspaceFolder}/lib/InvalidAccessError.js"
