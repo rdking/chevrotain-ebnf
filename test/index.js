@@ -21,7 +21,7 @@ Division = "/";
 `;
 
 var ebnfParser = new EBNFParser(EBNF);
-var Parser = ebnfParser.learnLanguage();
+var Parser = ebnfParser.learnLanguage("SimpleMath");
 
 const SOURCE = "1 + 2 * 3 - 4 / 5 + 6 / 7 - 8 * 9";
 var parser = new Parser(SOURCE);

@@ -102,12 +102,12 @@ const Tokens = [
 module.exports = (function() {
     function pvtData() {
         return {
-            allowList: true,
             tokens: null,
             grammar: null,
             astNodeTypes: null,
             generatedSource: null,
             compiler: null,
+            options: null,
             createRules() {
                 let p = getPrivate(this, "createRules", true);
                 let $ = this;
@@ -134,89 +134,59 @@ module.exports = (function() {
                 });
 
                 $.RULE("rhs", () => {
-                    $.OR([
-                        {
-                            ALT: () => {
-                                $.OR1([
-                                    { ALT: () => { $.SUBRULE($.rhs_optional); }},
-                                    { ALT: () => { $.SUBRULE($.rhs_repeated); }},
-                                    { ALT: () => { $.SUBRULE($.rhs_group); }}
-                                ]);
-                                if (p.allowList) {
-                                    p.allowList = false;
-                                    $.MANY(() => {
-                                        $.SUBRULE($.rhs_list);
-                                    });
-                                    p.allowList = true;
-                                }
-                            }
-                        },
-                        {
-                            ALT: () => {
-                                $.OPTION(() => {
-                                    $.OR2([
-                                        { ALT: () => { $.SUBRULE($.terminal); }},
-                                        { ALT: () => { $.SUBRULE($.identifier); }}
-                                    ]);
-                                    $.OPTION1(() => { $.CONSUME(Vocabulary.WhiteSpace); });
-                                    if (p.allowList) {
-                                        p.allowList = false;
-                                        $.MANY1(() => {
-                                            $.SUBRULE1($.rhs_list);
-                                        });
-                                        p.allowList = true;
-                                    }
-                                });
-                            }
+                    $.MANY_SEP({
+                        SEP: Vocabulary.Conjoin,
+                        DEF: () =>{
+                            $.OPTION(() => { $.CONSUME(Vocabulary.WhiteSpace); });
+                            $.SUBRULE($.rhs_alternation);
+                            $.OPTION1(() => { $.CONSUME1(Vocabulary.WhiteSpace); });
                         }
+                    });
+                });
+
+                $.RULE("rhs_alternation", () => {
+                    $.MANY_SEP({
+                        SEP: Vocabulary.Alternate,
+                        DEF: () => {
+                            $.OPTION(() => { $.CONSUME(Vocabulary.WhiteSpace); });
+                            $.SUBRULE1($.rhs_element);
+                            $.OPTION1(() => { $.CONSUME1(Vocabulary.WhiteSpace); });
+                        }
+                    })
+                });
+
+                $.RULE("rhs_element", () => {
+                    $.OR([
+                        { ALT: () => { $.SUBRULE($.rhs_optional); }},
+                        { ALT: () => { $.SUBRULE($.rhs_repeated); }},
+                        { ALT: () => { $.SUBRULE($.rhs_group); }},
+                        { ALT: () => { $.SUBRULE($.terminal); }},
+                        { ALT: () => { $.SUBRULE($.identifier); }}
                     ]);
                 });
 
                 $.RULE("rhs_optional", () => {
-                    let allowList = p.allowList;
                     $.CONSUME(Vocabulary.OpenOption);
                     $.OPTION(() => { $.CONSUME(Vocabulary.WhiteSpace); });
-                    p.allowList = true;
                     $.SUBRULE($.rhs);
-                    p.allowList = allowList;
                     $.OPTION1(() => { $.CONSUME1(Vocabulary.WhiteSpace); });
                     $.CONSUME(Vocabulary.CloseOption);
                 });
 
                 $.RULE("rhs_repeated", () => {
-                    let allowList = p.allowList;
                     $.CONSUME(Vocabulary.OpenRepeat);
                     $.OPTION(() => { $.CONSUME(Vocabulary.WhiteSpace); });
-                    p.allowList = true;
                     $.SUBRULE($.rhs);
-                    p.allowList = allowList;
                     $.OPTION1(() => { $.CONSUME1(Vocabulary.WhiteSpace); });
                     $.CONSUME(Vocabulary.CloseRepeat);
                 });
 
                 $.RULE("rhs_group", () => {
-                    let allowList = p.allowList;
                     $.CONSUME(Vocabulary.OpenGroup);
                     $.OPTION(() => { $.CONSUME(Vocabulary.WhiteSpace); });
-                    p.allowList = true;
                     $.SUBRULE($.rhs);
-                    p.allowList = allowList;
                     $.OPTION1(() => { $.CONSUME1(Vocabulary.WhiteSpace); });
                     $.CONSUME(Vocabulary.CloseGroup);
-                });
-
-                $.RULE("rhs_list", () => {
-                    $.SUBRULE($.rhs_separator);
-                    $.OPTION(() => { $.CONSUME(Vocabulary.WhiteSpace); });
-                    $.SUBRULE($.rhs);
-                    $.OPTION1(() => { $.CONSUME1(Vocabulary.WhiteSpace); });
-                });
-
-                $.RULE("rhs_separator", () => {
-                    $.OR([
-                        { ALT: () => { $.CONSUME(Vocabulary.Alternate); }},
-                        { ALT: () => { $.CONSUME(Vocabulary.Conjoin); }}
-                    ]);
                 });
 
                 $.RULE("terminal", () => {
@@ -287,7 +257,7 @@ module.exports = (function() {
             createAST(cst) {
                 let p = getPrivate(this, "createAST", true);
                 let Visitor = require("./lib/EBNFVisitor")(this.getBaseCstVisitorConstructor());
-                let visitor = new Visitor;
+                let visitor = new Visitor({source: p.grammar, name: p.options.name});
                 p.astNodeTypes = Visitor.Types;
                 return visitor.visit(cst);
             },
@@ -344,12 +314,13 @@ module.exports = (function() {
             fs.writeFileSync(filename, htmlText)
         }
 
-        learnLanguage() {
+        learnLanguage(name) {
             let p = getPrivate(this, "createParser");
             this.performSelfAnalysis();
             this.input = p.tokens;
             let cst = this.grammar();
-            console.log(cst);
+
+            p.options = { name };
 
             if (this.errors.length > 0) {
                 throw Error(collectParserErrors(this.errors));
