@@ -20,6 +20,14 @@ Multiplication = "*";
 Division = "/";
 `;
 
+function collectLexerErrors(errors) {
+    let retval = "";
+    for (let error of errors) {
+        retval += `\nLexer Error: ${error.message} (line: ${error.line}, col: ${error.column})`;
+    }
+    return retval;
+}
+
 var ebnfParser = new EBNFParser(EBNF);
 var Parser = ebnfParser.learnLanguage("SimpleMath");
 
