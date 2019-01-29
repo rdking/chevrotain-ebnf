@@ -254,19 +254,12 @@ module.exports = (function() {
                     ]);
                 });
             },
-            createAST(cst) {
+            createParser(cst) {
                 let p = getPrivate(this, "createAST", true);
                 let Visitor = require("./lib/EBNFVisitor")(this.getBaseCstVisitorConstructor());
                 let visitor = new Visitor({source: p.grammar, name: p.options.name});
                 p.astNodeTypes = Visitor.Types;
                 return visitor.visit(cst);
-            },
-            generateParser(ast) {
-                let p = getPrivate(this, "generateParser", true);
-                let visitor = new (require("./lib/EBNF_AST2JS"))(p.astNodeTypes);
-                let source = visitor.visit(ast);
-                p.compiler = source;
-                return eval(source);
             }
         };
     }
@@ -326,8 +319,7 @@ module.exports = (function() {
                 throw Error(collectParserErrors(this.errors));
             }
 
-            let ast = p.createAST(cst);
-            return p.generateParser(ast);
+            return p.createParser(cst);
         }
     };
 
