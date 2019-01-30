@@ -18,7 +18,7 @@ let ebnfParser = new EBNFParser(YOUR_EBNF_TEXT);
 That performs the lexing for your language using Chevrotain. Follow this by calling `learnLanguage()` with the name of your language as the parameter.
 
 ```js
-let YourLangParser = ebnfParser("YOUR_LANG_NAME");
+let YourLangParser = ebnfParser.learnLanguage("YOUR_LANG_NAME");
 ```
 
 Now just instantiate that `YourLangParser` and you have the parser for your new language.
