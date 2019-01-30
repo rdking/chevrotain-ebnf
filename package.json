@@ -1,6 +1,6 @@
 {
   "name": "chevrotain-ebnf",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A Chevrotain Lexer/Parser to convert EBNF into a Chevrotain Lexer/Parser.",
   "main": "index.js",
   "scripts": {
