@@ -257,7 +257,12 @@ module.exports = (function() {
             createParser(cst) {
                 let p = getPrivate(this, "createAST", true);
                 let Visitor = require("./lib/EBNFVisitor")(this.getBaseCstVisitorConstructor());
-                let visitor = new Visitor({source: p.grammar, name: p.options.name});
+                let visitor = new Visitor({
+                    source: p.grammar, 
+                    name: p.options.name, 
+                    tokenMap: p.options.tokenMap,
+                    asSource: p.options.asSource
+                });
                 p.astNodeTypes = Visitor.Types;
                 return visitor.visit(cst);
             },

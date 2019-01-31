@@ -1,13 +1,12 @@
 const { Lexer } = require("chevrotain");
 const EBNFParser = require("../index"); //require("chevrotain-ebnf");
 
-const EBNF = String.raw
-`Expression = Operation;
+const EBNF = `Expression = Operation;
 SubExpression = ( "(", [ ws ], Expression, [ ws ], ")" );
 ws = { " " | "\t" | "\n" | "\r" };
 Digit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9";
 Integer = Digit, { Digit };
-Operation = ASValue, [ ws ], { ASOperation };
+Operation = ASValue, { [ ws ], ASOperation };
 ASValue = MDValue, [ ws ], [ MDOperation ];
 MDValue = Integer | SubExpression;
 ASOperation = ASOP, [ ws ], ASValue;
@@ -28,6 +27,23 @@ function collectLexerErrors(errors) {
     return retval;
 }
 
+/**
+ * @description A LexMapElement is a simple, single-keyed object with the name
+ * of the key being the name given to the token during source generation, and
+ * the value of that key being the regular expression used by Chevrotain to
+ * match the token.
+ * @typedef LexMapElement
+ * @type {object}
+ * @property <YourTokenName> - a RegExp object
+ * 
+ * @typedef LexMap
+ * @type {LexMapElement[]}
+ * 
+ * You don't have to do this unless the order of your tokens is important.
+ * Chevrotain-ebnf can automatically extract your tokens for you. However,
+ * since the names given to them are arbitrary, it's recommended that you
+ * provide your own token map.
+ */
 var lexMap = [
     { Space: / / },
     { Tab: /\t/ },
@@ -50,6 +66,8 @@ var lexMap = [
     { Asterisk: /\*/ },
     { Slash: /\// }
 ];
+
+//First get a parser object....
 var ebnfParser = new EBNFParser(EBNF);
 var Parser = ebnfParser.learnLanguage("SimpleMath", lexMap);
 
@@ -64,5 +82,9 @@ if (lexResult.errors.length > 0) {
 
 parser.input = lexResult.tokens;
 let cst = parser.Expression();
-console.log(cst);
+console.log(JSON.stringify(cst, null, '  '));
 
+//Now get the source module
+var moduleSource = ebnfParser.learnLanguage("SimpleMath", lexMap, true);
+console.log("\n----------------------------------------\n");
+console.log(moduleSource);
