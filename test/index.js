@@ -28,8 +28,30 @@ function collectLexerErrors(errors) {
     return retval;
 }
 
+var lexMap = [
+    { Space: / / },
+    { Tab: /\t/ },
+    { LineFeed: /\n/ },
+    { NewLine: /\r/ },
+    { OpenGroup: /\(/ },
+    { CloseGroup: /\)/ },
+    { Zero: /0/ },
+    { One: /1/ },
+    { Two: /2/ },
+    { Three: /3/ },
+    { Four: /4/ },
+    { Five: /5/ },
+    { Six: /6/ },
+    { Seven: /7/ },
+    { Eight: /8/ },
+    { Nine: /9/ },
+    { Plus: /\+/ },
+    { Minus: /\-/ },
+    { Asterisk: /\*/ },
+    { Slash: /\// }
+];
 var ebnfParser = new EBNFParser(EBNF);
-var Parser = ebnfParser.learnLanguage("SimpleMath");
+var Parser = ebnfParser.learnLanguage("SimpleMath", lexMap);
 
 const SOURCE = "1 + 2 * 3 - 4 / 5 + 6 / 7 - 8 * 9";
 let parser = new Parser();

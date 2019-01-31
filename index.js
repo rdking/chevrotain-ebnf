@@ -260,6 +260,16 @@ module.exports = (function() {
                 let visitor = new Visitor({source: p.grammar, name: p.options.name});
                 p.astNodeTypes = Visitor.Types;
                 return visitor.visit(cst);
+            },
+            getTokenList(lexMap) {
+                let retval = [];
+                for (let mapping of lexMap) {
+                    retval.push(createToken({
+                        name: Object.keys(mapping)[0],
+                        pattern: Object.values(mapping)[0]
+                    }));
+                }
+                return retval;
             }
         };
     }
@@ -307,13 +317,13 @@ module.exports = (function() {
             fs.writeFileSync(filename, htmlText)
         }
 
-        learnLanguage(name) {
+        learnLanguage(name, tokenMap, asSource) {
             let p = getPrivate(this, "createParser");
             this.performSelfAnalysis();
             this.input = p.tokens;
             let cst = this.grammar();
 
-            p.options = { name };
+            p.options = { name, tokenMap: p.getTokenList(tokenMap), asSource };
 
             if (this.errors.length > 0) {
                 throw Error(collectParserErrors(this.errors));
