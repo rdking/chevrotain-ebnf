@@ -122,11 +122,9 @@ module.exports = (function() {
                 $.RULE("rule", () => {
                     $.SUBRULE($.lhs);
                     $.OPTION(() => { $.CONSUME(Vocabulary.WhiteSpace); });
-                    $.CONSUME2(Vocabulary.Define);
-                    $.OPTION1(() => { $.CONSUME3(Vocabulary.WhiteSpace); });
-                    $.SUBRULE2($.rhs);
-                    $.OPTION2(() => { $.CONSUME4(Vocabulary.WhiteSpace); });
-                    $.CONSUME5(Vocabulary.Terminator);
+                    $.CONSUME(Vocabulary.Define);
+                    $.SUBRULE($.rhs);
+                    $.CONSUME(Vocabulary.Terminator);
                 });
 
                 $.RULE("lhs", () => {
@@ -266,7 +264,7 @@ module.exports = (function() {
                 p.astNodeTypes = Visitor.Types;
                 return visitor.visit(cst);
             },
-            getTokenList(lexMap) {
+            getTokenList(lexMap = []) {
                 let retval = [];
                 for (let mapping of lexMap) {
                     retval.push(createToken({
