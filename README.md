@@ -125,11 +125,29 @@ npm i chevrotain-ebnf --save
 ```
 
 ## CLI
-This module also provides a command-line tool to generate a chevrotain module directly. It's `ebnfConvert`. Just pass it the EBNF file and it will dump the module to the console. To quickly convert an EBNF file to a Chevrotain grammar, do this:
+This module also provides a command-line tool to generate a chevrotain module directly. 
 
-```js
-node_modules/bin/ebnfConvert ebnfSource >> outputFile.js
 ```
+Usage: ebnfConvert [options]
+
+Options:
+  -V, --version          output the version number
+  -n, --name [name]      Name of the parser class
+  -s, --source [source]  Path to the EBNF source file.
+  -m, --map [map]        Path to a JSON formatted token map. [optional]
+  -o, --output [module]  Path to the output file. If not specified, the module will be dumped to the console. [optional]
+  -h, --help             output usage information
+```
+To convert an EBNF file to a Chevrotain module:
+```js
+./node_modules/bin/ebnfConvert -n <YourLangName> -s ebnfSource -o outputFile.js
+```
+or
+```js
+./node_modules/bin/ebnfConvert -n <YourLangName> -s ebnfSource >> outputFile.js
+```
+
+The second approach allows you to use ebnfConvert in pipelines by generating the target file on the fly.
 
 ## References
 * [Chevrotain](https://sap.github.io/chevrotain/docs/) - the core grammar parsing API
