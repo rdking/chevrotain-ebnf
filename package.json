@@ -25,7 +25,8 @@
   },
   "homepage": "https://github.com/rdking/chevrotain-ebnf#readme",
   "dependencies": {
-    "chevrotain": "^4.1.1"
+    "chevrotain": "^4.1.1",
+    "commander": "^2.19.0"
   },
   "devDependencies": {}
 }

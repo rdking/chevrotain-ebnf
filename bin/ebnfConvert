@@ -1,0 +1,28 @@
+#!/usr/local/bin/node
+const fs = require("fs");
+const cli = require("commander");
+const EBNFParser = require("../index"); //require("chevrotain-ebnf");
+
+cli .version("1.0.0")
+    .option("-n, --name [name]", "Name of the parser class")
+    .option("-s, --source [source]", "Path to the EBNF source file.")
+    .option("-m, --map [map]", "Path to a JSON formatted token map. [optional]")
+    .option("-o, --output [module]", "Path to the output file. If not specified, the module will be dumped to the console. [optional]")
+    .parse(process.argv);
+
+let {source:sourceFile, map: mapFile, output} = cli;
+let source = fs.readFileSync(sourceFile);
+let map;
+
+if (mapFile) {
+    map = fs.readFileSync(mapFile);
+}
+
+var ebnfParser = new EBNFParser(source);
+var moduleSource = ebnfParser.learnLanguage("SimpleMath", map, true);
+if (output) {
+    fs.writeFileSync(output, module_source);
+}
+else {
+    console.log(moduleSource);
+}
