@@ -208,14 +208,14 @@ module.exports = (function() {
 
                 $.RULE("dq_string_char", () => {
                     $.OR([
-                        { ALT: () => { $.CONSUME(Variable.SingleQuote); } },
+                        { ALT: () => { $.CONSUME(Vocabulary.SingleQuote); } },
                         { ALT: () => { $.SUBRULE($.character); } }
                     ]);
                 });
 
                 $.RULE("sq_string_char", () => {
                     $.OR([
-                        { ALT: () => { $.CONSUME(Variable.DoubleQuote); } },
+                        { ALT: () => { $.CONSUME(Vocabulary.DoubleQuote); } },
                         { ALT: () => { $.SUBRULE($.character); } }
                     ]);
                 });
@@ -299,7 +299,7 @@ module.exports = (function() {
             let lexResult = lexer.tokenize(ebnf);
             
             if (lexResult.errors.length > 0) {
-                throw new Error(collectLexerErrors(tokens.errors));
+                throw new Error(collectLexerErrors(lexResult.errors));
             }
 
             super(Vocabulary, config);
